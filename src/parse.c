@@ -60,8 +60,8 @@ int output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) 
         printf("Error seeking file in file descriptor!\n");
         return STATUS_ERROR;
     }
-    // Need to keep filesize, or converting to network endianness may change size!!!!
-    int filesize = dbhdr->filesize;
+    // Converting to network endianness may change the value of count!
+    int count = dbhdr->count;
 
     // Convert Database Header host endianess to network endianess
     dbhdr->count = htons(dbhdr->count);
@@ -73,10 +73,15 @@ int output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) 
         printf("Error writing header to database file.\n");
         return STATUS_ERROR;
     }
-    if (employees){
-        if (write(fd, employees, filesize - sizeof(struct dbheader_t)) == -1){
-            printf("Error writing employees to database file.\n");
-            return STATUS_ERROR;
+    if (count > 0){
+        struct employee_t *emp;
+        for (int i = 0; i < count; i++){
+            emp = &employees[i];
+            emp->hours = htonl(emp->hours);
+            if(write(fd, emp, sizeof(struct employee_t)) == -1){
+                printf("Error writing employee[%d] to database!\n", i);
+                return STATUS_ERROR;
+            }
         }
     }
     close(fd);

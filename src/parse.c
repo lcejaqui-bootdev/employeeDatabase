@@ -14,7 +14,10 @@ void list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {
     struct employee_t *emp;
     for (int i = 0; i < dbhdr->count; i++){
         emp = &employees[i];
-        printf("Num[%d]. Name: %s. Address: %s, Hours: %d\n", i, emp->name, emp->address, emp->hours);
+        printf("Employee %d\n", i);
+        printf("\t Name: %s\n", emp->name);
+        printf("\t Address: %s\n", emp->address);
+        printf("\t Hours: %d\n", emp->hours);
     }
 }
 
@@ -22,7 +25,7 @@ int add_employee(struct dbheader_t *dbhdr, struct employee_t *employees, char *a
     char *name = strtok(addstring, ",");
     char *address = strtok(NULL, ",");
     char *hours = strtok(NULL, ",");
-    printf("Name: %s, Address: %s, Hours: %s\n", name, address, hours);
+    
     strncpy(employees[dbhdr->count].name, name, MAX_DATA);
     strncpy(employees[dbhdr->count].address, address, MAX_DATA);
     employees[dbhdr->count].hours = atoi(hours);

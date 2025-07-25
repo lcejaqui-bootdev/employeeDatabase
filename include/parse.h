@@ -3,6 +3,7 @@
 
 #define HEADER_MAGIC 0x4c4c4144
 #define VERSION 1
+#define MAX_DATA 256
 
 struct dbheader_t {
 	unsigned int magic;
@@ -12,8 +13,8 @@ struct dbheader_t {
 };
 
 struct employee_t {
-	char name[256];
-	char address[256];
+	char name[MAX_DATA];
+	char address[MAX_DATA];
 	unsigned int hours;
 };
 

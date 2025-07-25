@@ -11,26 +11,58 @@
 #include "parse.h"
 
 void list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {
-
+    struct employee_t *emp;
+    for (int i = 0; i < dbhdr->count; i++){
+        emp = &employees[i];
+        printf("Num[%d]. Name: %s. Address: %s, Hours: %d\n", i, emp->name, emp->address, emp->hours);
+    }
 }
 
 int add_employee(struct dbheader_t *dbhdr, struct employee_t *employees, char *addstring) {
-    return 0;
+    char *name = strtok(addstring, ",");
+    char *address = strtok(NULL, ",");
+    char *hours = strtok(NULL, ",");
+    printf("Name: %s, Address: %s, Hours: %s\n", name, address, hours);
+    strncpy(employees[dbhdr->count].name, name, MAX_DATA);
+    strncpy(employees[dbhdr->count].address, address, MAX_DATA);
+    employees[dbhdr->count].hours = atoi(hours);
+    
+    return STATUS_SUCCESS;
 }
 
 int read_employees(int fd, struct dbheader_t *dbhdr, struct employee_t **employeesOut) {
-    return 0;
+    if (fd < 0){
+        printf("File Descriptor invalid in read_employees()\n");
+        return STATUS_ERROR;
+    }
+    int count = dbhdr->count;
+    
+    if (count == 0)
+        return STATUS_SUCCESS;
+
+    struct employee_t *employees = calloc(count, sizeof(struct employee_t));
+    if (employees == NULL){
+        perror("Error Allocating memory for employees!");
+        return STATUS_ERROR;
+    }
+    read(fd, employees, count * sizeof(struct employee_t));
+        
+    for (int i = 0; i < count ; i++){
+        employees[i].hours = ntohl(employees[i].hours);
+    }
+    *employeesOut = employees;
+    return STATUS_SUCCESS;
 }
 
 int output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) {
     
     if (lseek(fd, SEEK_SET, 0) == -1){
         printf("Error seeking file in file descriptor!\n");
-        free(dbhdr);
-        free(employees);
         return STATUS_ERROR;
     }
-    
+    // Need to keep filesize, or converting to network endianness may change size!!!!
+    int filesize = dbhdr->filesize;
+
     // Convert Database Header host endianess to network endianess
     dbhdr->count = htons(dbhdr->count);
     dbhdr->magic = htonl(dbhdr->magic);
@@ -42,10 +74,8 @@ int output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) 
         return STATUS_ERROR;
     }
     if (employees){
-        if (write(fd, employees, dbhdr->filesize - sizeof(struct dbheader_t)) == -1){
+        if (write(fd, employees, filesize - sizeof(struct dbheader_t)) == -1){
             printf("Error writing employees to database file.\n");
-            free(dbhdr);
-            free(employees);
             return STATUS_ERROR;
         }
     }

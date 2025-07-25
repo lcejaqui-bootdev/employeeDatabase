@@ -22,10 +22,10 @@ int main(int argc, char *argv[]) {
     int dbfd = -1;
     char *employee_str = NULL;
     char *filepath = NULL;
+
     bool newfile = false;
     bool list = false;
-    bool read = false;
-    bool add = false;
+
     struct dbheader_t *dbhdr = NULL;
     struct employee_t *employees = NULL;
 
@@ -78,20 +78,39 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    if (read_employees(dbfd, dbhdr, &employees) == STATUS_ERROR){
+        printf("Error reading employees from database!\n");
+        free(dbhdr);
+        free(employees);
+        close(dbfd);
+        return -1;
+    }
+
+    if (employee_str){
+        if (employees)
+            employees = realloc(employees, (dbhdr->count + 1) * sizeof(struct employee_t));
+        else
+            employees = calloc(1, sizeof(struct employee_t));
+        if (!employees){
+            perror("Error Reallocating memory for employees.\n");
+            free(dbhdr);
+            close(dbfd);
+            return -1;
+        }
+        add_employee(dbhdr, employees, employee_str);
+        dbhdr->count++;
+        dbhdr->filesize += sizeof(struct employee_t);
+    }
+
     if (list){
         list_employees(dbhdr, employees);
     }
 
-    if (add){
-        add_employee(dbhdr, employees, employee_str);
-    }
-
-    if (read){
-        read_employees(dbfd, dbhdr, &employees);
-    }
-
     if (output_file(dbfd, dbhdr, employees) == STATUS_ERROR){
         printf("Error writing to file!\n");
+        free(dbhdr);
+        free(employees);
+        close(dbfd);
         return -1;
     }
 

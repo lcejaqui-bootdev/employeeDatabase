@@ -5,8 +5,8 @@ OBJ = $(patsubst src/%.c, obj/%.o, $(SRC))
 CFLAGS = -Wall -g -Iinclude
 
 run: clean default
-	./$(TARGET) -f ./mynewdb.db -n 
-	./$(TARGET) -f ./mynewdb.db -a "Timmy H.,123 Sheshire Ln.,120"
+# 	./$(TARGET) -f
+# 	./$(TARGET) -f ./mynewdb.db -a "Timmy H.,123 Sheshire Ln.,120" ./mynewdb.db -n 
 
 default: $(TARGET)
 

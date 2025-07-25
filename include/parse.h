@@ -2,6 +2,7 @@
 #define PARSE_H
 
 #define HEADER_MAGIC 0x4c4c4144
+#define VERSION 1
 
 struct dbheader_t {
 	unsigned int magic;

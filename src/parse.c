@@ -112,17 +112,17 @@ int validate_db_header(int fd, struct dbheader_t **headerOut) {
 
     if (header->version != VERSION){
         printf("Invalid database version!\n");
-        free(header);
+        
         return STATUS_ERROR;
     }
     if (header->magic != HEADER_MAGIC){
         printf("Invalid Header Magic value!\n");
-        free(header);
+        
         return STATUS_ERROR;
     }
     if (header->filesize < sizeof(struct dbheader_t)){
         printf("Invalid filesize in Database Header!\n");
-        free(header);
+        
         return STATUS_ERROR;
     }
     *headerOut = header;
